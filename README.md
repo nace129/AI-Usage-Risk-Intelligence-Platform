@@ -1,9 +1,3 @@
-Absolutely. Below is a **clean, professional README** tailored **exactly for your Phase 1 + Phase 2 commit**, written so that **if someone reads only this file, they understand what you built, why it matters, and how it maps to a real engineering role**.
-
-You can drop this directly into `README.md` and commit it with your `v0.1.0` tag.
-
----
-
 # AI Usage Risk Intelligence Platform
 
 **Secure Cloud Backend Service (Spring Boot + Browser Extension)**
