@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: capture
+      POSTGRES_PASSWORD: capture
+      POSTGRES_DB: gpt_capture
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
