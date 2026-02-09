@@ -1,33 +1,25 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# OS junk
+.DS_Store
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Java build
+**/target/
+**/.idea/
+**/*.iml
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# Archives
+*.zip
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Ignore everything else by default
+*
 
-### VS Code ###
-.vscode/
+# Allow backend and extension
+!aiusage/
+!aiusage/**
+!aiusage_browser_extension/
+!aiusage_browser_extension/**
+
+# Allow root files
+!.gitignore
+!README.md
+
+*.swp

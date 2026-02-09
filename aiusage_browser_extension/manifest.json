@@ -1,0 +1,22 @@
+{ 
+ "manifest_version": 3,
+  "name": "ChatGPT Turn Capture",
+  "version": "1.0.0",
+  "description": "Captures ChatGPT prompts and responses and sends them to a backend API.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "http://localhost:8080/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
