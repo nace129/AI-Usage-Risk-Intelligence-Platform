@@ -1,3 +1,9 @@
+Below is a **fully updated README** that incorporates **Phase 3 (PII detection + risk scoring)** while preserving the clean, job-aligned structure you asked for earlier.
+You can **copy–paste this directly into `README.md`** in
+`https://github.com/nace129/AI-Usage-Risk-Intelligence-Platform`.
+
+---
+
 # AI Usage Risk Intelligence Platform
 
 **Secure Cloud Backend Service (Spring Boot + Browser Extension)**
@@ -6,11 +12,15 @@
 
 ## Overview
 
-This project implements a **production-style backend service and browser extension** that captures **user prompts and AI assistant responses** from ChatGPT in real time and stores them securely for analysis.
+AI Usage Risk Intelligence Platform is a **production-style backend system with a browser extension** that captures **user prompts and AI assistant responses** from ChatGPT and evaluates them for **privacy and security risk**.
 
-The system is designed to resemble a **real enterprise telemetry and compliance pipeline**, where AI usage must be monitored, audited, and evaluated for risk (e.g., PII leakage, policy violations, or sensitive data exposure).
+The system is designed to mirror how companies monitor **LLM usage, sensitive data exposure, and compliance risk** in enterprise environments.
 
-Phase 1 and Phase 2 focus on **reliable data ingestion**, **secure backend architecture**, and **correct correlation of prompt–response turns** — the foundation required before advanced risk scoring or governance features can be built.
+* **Phase 1**: Reliable prompt ingestion
+* **Phase 2**: Robust prompt–response correlation
+* **Phase 3**: Automated **PII detection + risk scoring pipeline**
+
+This project intentionally focuses on **security, auditability, and real-world architecture decisions**, not just data collection.
 
 ---
 
@@ -18,11 +28,11 @@ Phase 1 and Phase 2 focus on **reliable data ingestion**, **secure backend archi
 
 * **Language:** Java
 * **Framework:** Spring Boot (REST APIs)
-* **Browser Extension:** Chrome / Edge content script (Manifest V3)
+* **Browser Extension:** Chrome / Edge (Manifest V3, content script)
 * **Database:** PostgreSQL
 * **Cloud Ready:** AWS (EC2, RDS, IAM)
-* **Security Foundations:** Stateless APIs, hashed content fingerprints, environment-based secrets
-* **Dev Tools:** Git, Postman, Maven
+* **Security Foundations:** Stateless APIs, hashing, environment-based secrets
+* **Dev Tools:** Git, Maven, Postman
 
 ---
 
@@ -30,15 +40,16 @@ Phase 1 and Phase 2 focus on **reliable data ingestion**, **secure backend archi
 
 ### High-Level Flow
 
-<img width="1408" height="768" alt="image" src="https://github.com/user-attachments/assets/eea22fa1-e4dd-48ec-8bce-d8a17459c3fc" />
+<img width="1408" height="768" alt="generated-image-228bf2a4-571a-4251-b840-1302cc5241cd" src="https://github.com/user-attachments/assets/a49ace56-a63a-4df4-976e-a290bbcbbe68" />
 
 
-### Key Architectural Properties
+### Architectural Principles
 
 * Stateless backend APIs
-* Turn-based correlation using UUIDs
-* Idempotent ingestion to prevent duplicate records
-* Separation between capture logic (client) and policy logic (server)
+* UUID-based turn correlation
+* Asynchronous risk analysis
+* Separation of ingestion, scoring, and reporting
+* Designed for cloud deployment behind HTTPS load balancers
 
 ---
 
@@ -46,27 +57,37 @@ Phase 1 and Phase 2 focus on **reliable data ingestion**, **secure backend archi
 
 ### Phase 1 — Prompt Capture
 
-* Captures user prompts from the ChatGPT UI at send time
+* Captures user prompts at send time from ChatGPT UI
 * Generates a unique `turnId` per prompt
-* Stores prompt text, timestamps, device metadata, and content hash
-* Uses server-side validation and normalization
+* Stores prompt text, timestamps, device metadata, and SHA-256 hash
+* Input validation and normalization
 
 ### Phase 2 — Response Capture & Correlation
 
-* Captures AI assistant responses using a MutationObserver
-* Correlates responses to prompts using the same `turnId`
-* Handles asynchronous streaming responses
-* Supports “n-1” response capture behavior (response finalized safely on next user action)
-* Persists full prompt–response turns with status tracking (`PROMPT_ONLY`, `COMPLETED`)
+* Captures AI assistant responses using `MutationObserver`
+* Correlates responses to prompts via `turnId`
+* Handles streaming responses and UI timing edge cases
+* Stores complete prompt–response “turns”
+* Status tracking: `PROMPT_ONLY`, `COMPLETED`
 
-### Backend Capabilities
+### Phase 3 — Risk Scoring & PII Detection
 
-* RESTful APIs for ingestion and verification
-* SHA-256 hashing for content fingerprinting
-* PostgreSQL persistence with indexed fields
-* Debug and verification endpoint:
+* Automatically analyzes **prompt + response text**
+* Detects common PII using regex-based detectors:
 
-  * `GET /api/turns/recent?status=COMPLETED`
+  * Email
+  * SSN
+  * Phone number
+  * Credit card–like patterns
+* Computes an **explainable risk score (0.0 – 1.0)**
+* Stores structured results in `risk_scores`
+* Updates turn status:
+
+  * `CLEARED`
+  * `REVIEW`
+  * `FLAGGED`
+* Redacts sensitive content when risk is high
+* Risk scoring runs **asynchronously** so ingestion remains fast
 
 ---
 
@@ -74,15 +95,16 @@ Phase 1 and Phase 2 focus on **reliable data ingestion**, **secure backend archi
 
 👉 **This section is intentional and differentiates the project**
 
-* **Stateless ingestion design:** No server-side sessions; every request is self-contained.
-* **Turn-based UUID correlation:** Prevents replay or accidental duplication of events.
+* **Stateless ingestion:** No server-side sessions; every request is self-contained.
+* **Turn-based UUID correlation:** Prevents duplicate or mismatched events.
 * **No secrets in client code:** Extension sends only minimal metadata.
 * **Hashed content fingerprints:** Enables deduplication and analytics without relying solely on raw text.
 * **Environment-based configuration:** Database credentials and secrets are never hardcoded.
 * **HTTPS-ready:** Designed to be deployed behind TLS-enabled load balancers.
-* **Input validation:** DTO-level validation prevents malformed or abusive payloads.
+* **PII-aware pipeline:** Sensitive data is detected, scored, and optionally redacted before long-term storage.
+* **Explainable scoring:** Risk decisions are rule-based and auditable (no black-box ML).
 
-These choices mirror real-world **AI governance, security, and compliance pipelines** used in enterprise environments.
+These choices mirror real-world **AI governance, security, and compliance systems** used in enterprise environments.
 
 ---
 
@@ -95,7 +117,7 @@ These choices mirror real-world **AI governance, security, and compliance pipeli
 ```json
 {
   "turnId": "uuid-v4",
-  "prompt": "hello",
+  "prompt": "my email is abc@gmail.com",
   "pageUrl": "https://chatgpt.com/",
   "capturedAt": "2026-02-09T05:11:13.889Z",
   "userAgent": "Chrome/...",
@@ -121,11 +143,25 @@ These choices mirror real-world **AI governance, security, and compliance pipeli
 
 ---
 
-### Verify Stored Data
+### Verify Stored Turns
 
 **GET** `/api/turns/recent?status=COMPLETED`
 
-Returns recently captured prompt–response pairs for verification and debugging.
+---
+
+### View Risk Score for a Turn
+
+**GET** `/api/turns/{turnId}/risk`
+
+Returns the latest risk score and detected PII details.
+
+---
+
+### View Recent Risky Turns
+
+**GET** `/api/turns/risk/recent?minScore=0.4`
+
+Returns recently flagged or high-risk interactions.
 
 ---
 
@@ -168,10 +204,15 @@ Returns recently captured prompt–response pairs for verification and debugging
 6. **Test the system**
 
    * Send prompts in ChatGPT
-   * Verify records via:
+   * Verify ingestion:
 
      ```bash
-     curl http://localhost:8080/api/turns/recent?status=COMPLETED
+     curl http://localhost:8080/api/turns/recent
+     ```
+   * Verify risk scoring:
+
+     ```bash
+     curl http://localhost:8080/api/turns/risk/recent?minScore=0.1
      ```
 
 ---
@@ -181,28 +222,28 @@ Returns recently captured prompt–response pairs for verification and debugging
 If someone reads only this README, they should understand:
 
 * **What was built:**
-  A full prompt–response capture pipeline for AI usage.
+  A full ingestion and analysis pipeline for AI usage.
 
 * **Why it’s secure:**
-  Stateless APIs, hashed data, environment-based secrets, and controlled ingestion.
+  Stateless APIs, hashed data, environment-based secrets, and automated PII detection.
 
 * **How it maps to real jobs:**
-  This mirrors systems used for AI governance, telemetry ingestion, security auditing, and compliance tooling in real companies.
+  This mirrors systems used for AI governance, telemetry ingestion, compliance tooling, and security analytics in real companies.
 
 ---
 
-## Future Improvements (Next Phases)
+## Future Improvements
 
-* Automated PII detection and redaction
-* Risk scoring service for AI usage
-* Asynchronous processing via Kafka or SQS
+* Machine-learning–based PII classification
+* Streaming ingestion via Kafka or SQS
+* Configurable data retention policies
 * Role-based dashboards for audits
 * Rate limiting and abuse detection
-* Enterprise auth (OAuth / SSO)
+* Enterprise authentication (OAuth / SSO)
 
 ---
 
 ## Versioning
 
-* **v0.1.0** — Phase 1 + Phase 2: reliable prompt–response capture and backend ingestion
-
+* **v0.1.0** — Phase 1 + Phase 2: prompt–response capture
+* **v0.2.0** — Phase 3: PII detection and risk scoring
