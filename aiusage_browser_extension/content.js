@@ -74,15 +74,55 @@
     return false;
   }
 
+  // async function getOrCreateDeviceId() {
+  //   return new Promise((resolve) => {
+  //     chrome.storage.local.get({ deviceId: null }, (data) => {
+  //       if (data.deviceId) return resolve(data.deviceId);
+  //       const id = crypto.randomUUID();
+  //       chrome.storage.local.set({ deviceId: id }, () => resolve(id));
+  //     });
+  //   });
+  // }
   async function getOrCreateDeviceId() {
-    return new Promise((resolve) => {
+  // If extension APIs aren't available for any reason, fallback.
+  if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local) {
+    let id = localStorage.getItem("__aiusage_deviceId");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("__aiusage_deviceId", id);
+    }
+    return id;
+  }
+
+  return new Promise((resolve) => {
+    try {
       chrome.storage.local.get({ deviceId: null }, (data) => {
+        if (chrome.runtime?.lastError) {
+          // fallback if storage throws
+          let id = localStorage.getItem("__aiusage_deviceId");
+          if (!id) {
+            id = crypto.randomUUID();
+            localStorage.setItem("__aiusage_deviceId", id);
+          }
+          return resolve(id);
+        }
+
         if (data.deviceId) return resolve(data.deviceId);
+
         const id = crypto.randomUUID();
         chrome.storage.local.set({ deviceId: id }, () => resolve(id));
       });
-    });
-  }
+    } catch (e) {
+      // last resort fallback
+      let id = localStorage.getItem("__aiusage_deviceId");
+      if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem("__aiusage_deviceId", id);
+      }
+      resolve(id);
+    }
+  });
+}
 
   async function postJson(url, payload) {
     try {
