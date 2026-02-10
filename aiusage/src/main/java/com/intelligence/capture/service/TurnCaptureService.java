@@ -23,9 +23,12 @@ public class TurnCaptureService {
     public static final String STATUS_COMPLETED = "COMPLETED";
 
     private final PromptEventRepository repo;
+    private final RiskService riskService;
+    
 
-    public TurnCaptureService(PromptEventRepository repo) {
+    public TurnCaptureService(PromptEventRepository repo, RiskService riskService) {
         this.repo = repo;
+        this.riskService = riskService;
     }
 
     @Transactional
@@ -66,8 +69,12 @@ public class TurnCaptureService {
         e.setResponseMetadata(new HashMap<>());
 
         e.setCreatedAt(Instant.now());
+        
+        PromptEvent saved = repo.save(e);
+riskService.scoreTurn(saved.getTurnId()); // score prompt immediately
+return saved;
 
-        return repo.save(e);
+        //return repo.save(e);
     }
 
     @Transactional
@@ -97,7 +104,12 @@ public class TurnCaptureService {
 
         e.setStatus(STATUS_COMPLETED);
 
-        return repo.save(e);
+        PromptEvent saved = repo.save(e);
+
+        // Kick off Phase 3 async risk scoring
+        riskService.scoreTurn(saved.getTurnId());
+
+        return saved;
     }
 
     // ---------- helpers ----------
