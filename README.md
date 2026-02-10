@@ -1,9 +1,3 @@
-Below is a **fully updated README** that incorporates **Phase 3 (PII detection + risk scoring)** while preserving the clean, job-aligned structure you asked for earlier.
-You can **copy–paste this directly into `README.md`** in
-`https://github.com/nace129/AI-Usage-Risk-Intelligence-Platform`.
-
----
-
 # AI Usage Risk Intelligence Platform
 
 **Secure Cloud Backend Service (Spring Boot + Browser Extension)**
